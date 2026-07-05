@@ -1,0 +1,6 @@
+[package]
+name = "s_1480_Running_Sum_of_1d_Array"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
