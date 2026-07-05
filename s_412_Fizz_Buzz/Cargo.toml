@@ -1,0 +1,6 @@
+[package]
+name = "s_412_Fizz_Buzz"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

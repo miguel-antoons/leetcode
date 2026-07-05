@@ -13,3 +13,7 @@ version = "0.1.0"
 [[package]]
 name = "s_2236_Root_Equals_Sum_of_Children"
 version = "0.1.0"
+
+[[package]]
+name = "s_412_Fizz_Buzz"
+version = "0.1.0"

@@ -1,2 +1,2 @@
 [workspace]
-members = ["s_1480_Running_Sum_of_1d_Array", "s_1672_Richest_Customer_Wealth", "s_2236_Root_Equals_Sum_of_Children"]
+members = ["s_1480_Running_Sum_of_1d_Array", "s_1672_Richest_Customer_Wealth", "s_2236_Root_Equals_Sum_of_Children", "s_412_Fizz_Buzz"]
