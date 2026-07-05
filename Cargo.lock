@@ -7,5 +7,9 @@ name = "s_1480_Running_Sum_of_1d_Array"
 version = "0.1.0"
 
 [[package]]
+name = "s_1672_Richest_Customer_Wealth"
+version = "0.1.0"
+
+[[package]]
 name = "s_2236_Root_Equals_Sum_of_Children"
 version = "0.1.0"
