@@ -3,6 +3,10 @@
 version = 4
 
 [[package]]
+name = "s_1342_Number_of_Steps_to_Reduce_a_Number_to_Zero"
+version = "0.1.0"
+
+[[package]]
 name = "s_1480_Running_Sum_of_1d_Array"
 version = "0.1.0"
 
