@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""Create a LeetCode project structure from a problem title."""
+
+import os
+import re
+import sys
+
+
+def sanitize_title(title: str) -> str:
+    """Remove spaces and special characters from the title."""
+    # Replace spaces and dots with underscores
+    sanitized = re.sub(r'[^a-zA-Z0-9]', '_', title)
+    # Remove consecutive underscores
+    sanitized = re.sub(r'_+', '_', sanitized)
+    # Remove leading/trailing underscores
+    sanitized = sanitized.strip('_')
+    # If the name starts with a digit, prefix with s_
+    if sanitized and sanitized[0].isdigit():
+        sanitized = f's_{sanitized}'
+    return sanitized
+
+
+def add_to_workspace_members(dir_name: str):
+    """Add the new project to the root Cargo.toml workspace members."""
+    root_cargo_path = 'Cargo.toml'
+    
+    if not os.path.exists(root_cargo_path):
+        # Create a new workspace Cargo.toml if it doesn't exist
+        with open(root_cargo_path, 'w') as f:
+            f.write(f'[workspace]\nmembers = ["{dir_name}"]\n')
+        return
+    
+    # Read the existing Cargo.toml
+    with open(root_cargo_path, 'r') as f:
+        content = f.read()
+    
+    # Check if workspace section exists
+    if '[workspace]' not in content:
+        # Add workspace section at the end
+        with open(root_cargo_path, 'a') as f:
+            f.write(f'\n[workspace]\nmembers = ["{dir_name}"]\n')
+        return
+    
+    # Find and update the members array
+    # Look for members = [...] pattern
+    lines = content.split('\n')
+    in_members = False
+    members_line_idx = -1
+    closing_bracket_idx = -1
+    
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith('members = ['):
+            members_line_idx = i
+            in_members = True
+        elif in_members and ']' in stripped:
+            closing_bracket_idx = i
+            break
+    
+    if members_line_idx == -1:
+        # No members array found, add it
+        for i, line in enumerate(lines):
+            if line.strip() == '[workspace]':
+                lines.insert(i + 1, f'members = ["{dir_name}"]')
+                break
+    else:
+        # Parse the members array and add the new member
+        members_line = lines[members_line_idx]
+        # Extract the list content
+        start = members_line.find('[') + 1
+        end = members_line.rfind(']')
+        members_content = members_line[start:end]
+        
+        # Parse existing members
+        existing_members = []
+        if members_content.strip():
+            existing_members = [m.strip().strip('"') for m in members_content.split(',') if m.strip()]
+        
+        # Add new member if not already present
+        if dir_name not in existing_members:
+            existing_members.append(dir_name)
+            existing_members.sort()
+            
+        # Rebuild the members line
+        if len(existing_members) == 1:
+            members_str = f'"{existing_members[0]}"'
+        else:
+            members_str = ', '.join(f'"{m}"' for m in existing_members)
+        
+        lines[members_line_idx] = f'members = [{members_str}]'
+        
+        # If there are multiple lines in the array (spanning multiple lines), we need to handle that
+        if closing_bracket_idx > members_line_idx:
+            # Remove the closing bracket line and add to members_line
+            lines[closing_bracket_idx] = ''
+    
+    # Write back the updated content
+    content = '\n'.join(line for line in lines if line.strip() != '')
+    content = re.sub(r'\n{3,}', '\n\n', content)
+    
+    with open(root_cargo_path, 'w') as f:
+        f.write(content)
+
+
+def create_project_structure(title: str) -> str:
+    """Create the project directory and files."""
+    # Sanitize the title for the directory name
+    dir_name = sanitize_title(title)
+    
+    # Create directory
+    os.makedirs(dir_name, exist_ok=True)
+    
+    # Create src directory
+    src_dir = os.path.join(dir_name, 'src')
+    os.makedirs(src_dir, exist_ok=True)
+    
+    # Create tests directory (Cargo expects plural 'tests')
+    test_dir = os.path.join(dir_name, 'tests')
+    os.makedirs(test_dir, exist_ok=True)
+    
+    # Create lib.rs with Solution struct (as a library)
+    lib_rs_content = """// LeetCode problem: {title}
+
+pub struct Solution;
+
+impl Solution {{
+    // Your solution methods here
+}}
+""".format(title=title)
+    
+    with open(os.path.join(src_dir, 'lib.rs'), 'w') as f:
+        f.write(lib_rs_content)
+    
+    # Create main.rs with simple entry point
+    main_rs_content = """// LeetCode problem: {title}
+
+fn main() {{
+    println!("Hello, LeetCode!");
+}}
+""".format(title=title)
+    
+    with open(os.path.join(src_dir, 'main.rs'), 'w') as f:
+        f.write(main_rs_content)
+    
+    # Create tests/test.rs with dummy integration test
+    test_rs_content = """use {dir_name}::Solution;
+
+#[test]
+fn test_placeholder() {{
+    // Placeholder test - replace with your actual tests
+    assert!(true);
+}}
+""".format(dir_name=dir_name)
+    
+    with open(os.path.join(test_dir, 'test.rs'), 'w') as f:
+        f.write(test_rs_content)
+    
+    # Create Cargo.toml
+    cargo_toml_content = """[package]
+name = "{dir_name}"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+""".format(dir_name=dir_name)
+    
+    with open(os.path.join(dir_name, 'Cargo.toml'), 'w') as f:
+        f.write(cargo_toml_content)
+    
+    # Create REPORT.md
+    report_content = "# {title}\n\n## Solution\n\n## Approach\n\n## Complexity Analysis\n\n## Test Cases\n".format(title=title)
+    
+    with open(os.path.join(dir_name, 'REPORT.md'), 'w') as f:
+        f.write(report_content)
+    
+    return dir_name
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: ./create_leetcode_project <problem_title>")
+        print("Example: ./create_leetcode_project '2236. Root Equals Sum of Children'")
+        sys.exit(1)
+    
+    title = sys.argv[1]
+    
+    try:
+        dir_name = create_project_structure(title)
+        add_to_workspace_members(dir_name)
+        print(f"Created project structure in '{dir_name}/'")
+        print(f"  - {dir_name}/Cargo.toml")
+        print(f"  - {dir_name}/src/main.rs")
+        print(f"  - {dir_name}/src/lib.rs")
+        print(f"  - {dir_name}/tests/test.rs")
+        print(f"  - {dir_name}/REPORT.md")
+        print(f"  - Added '{dir_name}' to root Cargo.toml workspace members")
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
