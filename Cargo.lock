@@ -19,5 +19,13 @@ name = "s_2236_Root_Equals_Sum_of_Children"
 version = "0.1.0"
 
 [[package]]
+name = "s_238_Product_of_Array_Except_Self"
+version = "0.1.0"
+
+[[package]]
 name = "s_412_Fizz_Buzz"
+version = "0.1.0"
+
+[[package]]
+name = "s_876_Middle_of_The_Linked_List"
 version = "0.1.0"
