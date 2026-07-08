@@ -41,61 +41,48 @@ def add_to_workspace_members(dir_name: str):
             f.write(f'\n[workspace]\nmembers = ["{dir_name}"]\n')
         return
     
-    # Find and update the members array
-    # Look for members = [...] pattern
-    lines = content.split('\n')
-    in_members = False
-    members_line_idx = -1
-    closing_bracket_idx = -1
+    # Find the members array using regex that handles multi-line arrays
+    members_pattern = r'(members\s*=\s*\[)([^\]]*)(\])'
+    match = re.search(members_pattern, content, re.DOTALL)
     
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith('members = ['):
-            members_line_idx = i
-            in_members = True
-        elif in_members and ']' in stripped:
-            closing_bracket_idx = i
-            break
-    
-    if members_line_idx == -1:
-        # No members array found, add it
-        for i, line in enumerate(lines):
-            if line.strip() == '[workspace]':
-                lines.insert(i + 1, f'members = ["{dir_name}"]')
-                break
+    if not match:
+        # No members array found, add it after [workspace]
+        content = content.replace('[workspace]', f'[workspace]\nmembers = ["{dir_name}"]')
     else:
-        # Parse the members array and add the new member
-        members_line = lines[members_line_idx]
-        # Extract the list content
-        start = members_line.find('[') + 1
-        end = members_line.rfind(']')
-        members_content = members_line[start:end]
+        _ = match.group(1)
+        members_content = match.group(2)
+        _ = match.group(3)
         
-        # Parse existing members
-        existing_members = []
-        if members_content.strip():
-            existing_members = [m.strip().strip('"') for m in members_content.split(',') if m.strip()]
+        # Find all quoted strings in the members content (handles both single and multi-line)
+        existing_members = re.findall(r'"([^"]+)"', members_content)
         
         # Add new member if not already present
         if dir_name not in existing_members:
             existing_members.append(dir_name)
             existing_members.sort()
-            
-        # Rebuild the members line
+        
+        # Check if original was multi-line (has newlines in the content between brackets)
+        is_multiline = '\n' in members_content
+        
+        # Rebuild the members array
         if len(existing_members) == 1:
-            members_str = f'"{existing_members[0]}"'
+            new_members = f'members = ["{existing_members[0]}"]'
+        elif is_multiline:
+            # Use proper TOML multi-line array format
+            new_members_lines = ['members = [']
+            for m in existing_members:
+                new_members_lines.append(f'    "{m}",')
+            new_members_lines.append(']')
+            new_members = '\n'.join(new_members_lines)
         else:
+            # Single-line format
             members_str = ', '.join(f'"{m}"' for m in existing_members)
+            new_members = f'members = [{members_str}]'
         
-        lines[members_line_idx] = f'members = [{members_str}]'
-        
-        # If there are multiple lines in the array (spanning multiple lines), we need to handle that
-        if closing_bracket_idx > members_line_idx:
-            # Remove the closing bracket line and add to members_line
-            lines[closing_bracket_idx] = ''
+        # Replace the old members array with the new one
+        content = content[:match.start()] + new_members + content[match.end():]
     
-    # Write back the updated content
-    content = '\n'.join(line for line in lines if line.strip() != '')
+    # Normalize excessive whitespace
     content = re.sub(r'\n{3,}', '\n\n', content)
     
     with open(root_cargo_path, 'w') as f:
