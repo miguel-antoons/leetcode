@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "s_1331_Rank_Transform_of_an_Array",
     "s_1342_Number_of_Steps_to_Reduce_a_Number_to_Zero",
     "s_1480_Running_Sum_of_1d_Array",
     "s_1672_Richest_Customer_Wealth",
