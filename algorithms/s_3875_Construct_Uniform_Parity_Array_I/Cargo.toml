@@ -1,0 +1,6 @@
+[package]
+name = "s_3875_Construct_Uniform_Parity_Array_I"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

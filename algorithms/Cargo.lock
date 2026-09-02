@@ -31,6 +31,10 @@ name = "s_383_Ransom_Note"
 version = "0.1.0"
 
 [[package]]
+name = "s_3875_Construct_Uniform_Parity_Array_I"
+version = "0.1.0"
+
+[[package]]
 name = "s_412_Fizz_Buzz"
 version = "0.1.0"
 
