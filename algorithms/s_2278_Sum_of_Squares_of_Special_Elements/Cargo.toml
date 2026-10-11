@@ -1,0 +1,6 @@
+[package]
+name = "s_2278_Sum_of_Squares_of_Special_Elements"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
