@@ -1,0 +1,6 @@
+[package]
+name = "s_1390_Four_Divisors"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
