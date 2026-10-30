@@ -43,6 +43,10 @@ name = "s_3875_Construct_Uniform_Parity_Array_I"
 version = "0.1.0"
 
 [[package]]
+name = "s_3882_Minimum_XOR_Path_in_a_Grid"
+version = "0.1.0"
+
+[[package]]
 name = "s_3886_Sum_of_Sortable_Integers"
 version = "0.1.0"
 

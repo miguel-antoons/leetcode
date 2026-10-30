@@ -10,6 +10,7 @@ members = [
     "s_238_Product_of_Array_Except_Self",
     "s_383_Ransom_Note",
     "s_3875_Construct_Uniform_Parity_Array_I",
+    "s_3882_Minimum_XOR_Path_in_a_Grid",
     "s_3886_Sum_of_Sortable_Integers",
     "s_412_Fizz_Buzz",
     "s_876_Middle_of_The_Linked_List",
